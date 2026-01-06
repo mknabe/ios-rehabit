@@ -14,6 +14,7 @@ struct HabitsListView: View {
     
     @State private var showingAddHabit = false
     @State private var searchText = ""
+    @State private var habitToLog: Habit?
     
     var filteredHabits: [Habit] {
         if searchText.isEmpty {
@@ -39,8 +40,16 @@ struct HabitsListView: View {
                                     logHabitNow(habit)
                                 })
                             }
+                            .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                                Button {
+                                    habitToLog = habit
+                                } label: {
+                                    Label("Custom Log", systemImage: "calendar.badge.plus")
+                                        .labelStyle(.iconOnly)
+                                }
+                                .tint(.blue)
+                            }
                         }
-                        .onDelete(perform: deleteHabits)
                     }
                     .searchable(text: $searchText, prompt: "Search habits")
                 }
@@ -53,14 +62,6 @@ struct HabitsListView: View {
                 HabitDetailView(habit: habit)
             }
             .toolbar {
-                #if os(iOS)
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    if !habits.isEmpty {
-                        EditButton()
-                    }
-                }
-                #endif
-                
                 ToolbarItem(placement: .primaryAction) {
                     Button {
                         showingAddHabit = true
@@ -72,15 +73,13 @@ struct HabitsListView: View {
             .sheet(isPresented: $showingAddHabit) {
                 HabitFormView()
             }
+            .sheet(item: $habitToLog) { habit in
+                LogHabitView(habit: habit)
+                    .presentationDetents([.medium])
+            }
         }
     }
     
-    private func deleteHabits(at offsets: IndexSet) {
-        for index in offsets {
-            modelContext.delete(filteredHabits[index])
-        }
-    }
-
     private func logHabitNow(_ habit: Habit) {
         let log = HabitLog(loggedAt: Date())
         log.habit = habit

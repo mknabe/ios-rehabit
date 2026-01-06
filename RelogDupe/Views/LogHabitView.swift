@@ -31,7 +31,7 @@ struct LogHabitView: View {
                         .focused($isNotesFieldFocused)
                 }
             }
-            .navigationTitle("Log \(habit.emoji) \(habit.name)")
+            .navigationTitle("\(habit.emoji) \(habit.name)")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

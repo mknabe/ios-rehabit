@@ -71,6 +71,7 @@ struct HabitDetailView: View {
         }
         .sheet(isPresented: $showingLogSheet) {
             LogHabitView(habit: habit)
+                .presentationDetents([.medium])
         }
         .sheet(isPresented: $showingEditSheet) {
             HabitEditView(habit: habit)

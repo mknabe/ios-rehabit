@@ -40,7 +40,9 @@ struct HabitRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 // Habit name
                 Text(habit.name)
-                    .font(.headline)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .fontDesign(.rounded)
                 
                 // Last logged time
                 if let lastLog = habit.lastLogDate {
