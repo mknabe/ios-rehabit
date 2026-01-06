@@ -35,7 +35,9 @@ struct HabitsListView: View {
                     List {
                         ForEach(filteredHabits) { habit in
                             NavigationLink(value: habit) {
-                                HabitRow(habit: habit)
+                                HabitRow(habit: habit, onEmojiTap: {
+                                    logHabitNow(habit)
+                                })
                             }
                         }
                         .onDelete(perform: deleteHabits)
@@ -77,6 +79,17 @@ struct HabitsListView: View {
         for index in offsets {
             modelContext.delete(filteredHabits[index])
         }
+    }
+
+    private func logHabitNow(_ habit: Habit) {
+        let log = HabitLog(loggedAt: Date())
+        log.habit = habit
+        modelContext.insert(log)
+
+        #if os(iOS) && !targetEnvironment(simulator)
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+        #endif
     }
 }
 

@@ -10,13 +10,32 @@ import SwiftData
 
 struct HabitRow: View {
     let habit: Habit
+    let onEmojiTap: (() -> Void)?
+
+    init(habit: Habit, onEmojiTap: (() -> Void)? = nil) {
+        self.habit = habit
+        self.onEmojiTap = onEmojiTap
+    }
     
     var body: some View {
         HStack(spacing: 12) {
             // Emoji
-            Text(habit.emoji)
-                .font(.system(size: 40))
-                .frame(width: 50, height: 50)
+            Group {
+                if let onEmojiTap {
+                    Button(action: onEmojiTap) {
+                        Text(habit.emoji)
+                            .font(.system(size: 40))
+                            .frame(width: 50, height: 50)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Log \(habit.name)")
+                    .accessibilityHint("Creates a new log with the current time")
+                } else {
+                    Text(habit.emoji)
+                        .font(.system(size: 40))
+                        .frame(width: 50, height: 50)
+                }
+            }
             
             VStack(alignment: .leading, spacing: 4) {
                 // Habit name
@@ -25,7 +44,7 @@ struct HabitRow: View {
                 
                 // Last logged time
                 if let lastLog = habit.lastLogDate {
-                    Text("Last logged \(lastLog, style: .relative)")
+                    Text(lastLog, style: .relative)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 } else {
@@ -47,7 +66,7 @@ struct HabitRow: View {
             }
         }
         .padding(.vertical, 4)
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .contain)
         .accessibilityLabel("\(habit.emoji) \(habit.name)")
         .accessibilityHint("Tap to view logs")
         .accessibilityValue(habit.lastLogDate != nil ? "Last logged \(habit.lastLogDate!, style: .relative)" : "Not logged yet")

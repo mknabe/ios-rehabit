@@ -13,6 +13,7 @@ struct HabitDetailView: View {
     
     @Environment(\.modelContext) private var modelContext
     @State private var showingLogSheet = false
+    @State private var showingEditSheet = false
     
     var sortedLogs: [HabitLog] {
         (habit.logs ?? []).sorted(by: { $0.loggedAt > $1.loggedAt })
@@ -40,12 +41,26 @@ struct HabitDetailView: View {
         .toolbar {
             #if os(iOS)
             ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    showingEditSheet = true
+                } label: {
+                    Label("Edit Habit", systemImage: "pencil")
+                }
+            }
+
+            ToolbarItem(placement: .navigationBarTrailing) {
                 if !sortedLogs.isEmpty {
                     EditButton()
                 }
             }
+            #else
+            ToolbarItem {
+                Button("Edit") {
+                    showingEditSheet = true
+                }
+            }
             #endif
-            
+
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     showingLogSheet = true
@@ -56,6 +71,9 @@ struct HabitDetailView: View {
         }
         .sheet(isPresented: $showingLogSheet) {
             LogHabitView(habit: habit)
+        }
+        .sheet(isPresented: $showingEditSheet) {
+            HabitEditView(habit: habit)
         }
         #if os(iOS)
         .overlay(alignment: .bottomTrailing) {
