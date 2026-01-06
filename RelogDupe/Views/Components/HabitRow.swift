@@ -45,19 +45,6 @@ struct HabitRow: View {
                         .clipShape(Capsule())
                 }
             }
-            
-            Spacer()
-            
-            // Log count badge
-            if habit.totalLogs > 0 {
-                Text("\(habit.totalLogs)")
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.white)
-                    .frame(minWidth: 24, minHeight: 24)
-                    .background(.blue)
-                    .clipShape(Circle())
-            }
         }
         .padding(.vertical, 4)
         .accessibilityElement(children: .combine)

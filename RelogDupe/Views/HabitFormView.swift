@@ -19,6 +19,7 @@ struct HabitFormView: View {
     @State private var habitDescription = ""
     @State private var selectedCategory: HabitCategory?
     @State private var showingAddCategory = false
+    @State private var showingEmojiPicker = false
     @State private var newCategoryName = ""
     @FocusState private var focusedField: Field?
     
@@ -37,14 +38,14 @@ struct HabitFormView: View {
                         
                         if emoji.isEmpty {
                             Button {
-                                focusedField = .emoji
+                                showingEmojiPicker = true
                             } label: {
                                 Text("Tap to choose")
                                     .foregroundStyle(.secondary)
                             }
                         } else {
                             Button {
-                                focusedField = .emoji
+                                showingEmojiPicker = true
                             } label: {
                                 Text(emoji)
                                     .font(.system(size: 40))
@@ -108,14 +109,8 @@ struct HabitFormView: View {
                 }
                 #endif
             }
-            .sheet(item: Binding(
-                get: { focusedField == .emoji ? EmojiPickerIdentifier() : nil },
-                set: { _ in focusedField = nil }
-            )) { _ in
-                EmojiPickerSheet(selectedEmoji: $emoji, isPresented: Binding(
-                    get: { focusedField == .emoji },
-                    set: { if !$0 { focusedField = nil } }
-                ))
+            .sheet(isPresented: $showingEmojiPicker) {
+                EmojiPickerSheet(selectedEmoji: $emoji, isPresented: $showingEmojiPicker)
             }
             .alert("New Category", isPresented: $showingAddCategory) {
                 TextField("Category name", text: $newCategoryName)
@@ -156,11 +151,6 @@ struct HabitFormView: View {
         selectedCategory = newCategory
         newCategoryName = ""
     }
-}
-
-// Helper for sheet presentation
-struct EmojiPickerIdentifier: Identifiable {
-    let id = UUID()
 }
 
 // Native emoji keyboard sheet
