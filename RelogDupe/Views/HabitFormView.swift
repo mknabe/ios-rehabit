@@ -19,7 +19,6 @@ struct HabitFormView: View {
     @State private var habitDescription = ""
     @State private var selectedCategory: HabitCategory?
     @State private var showingAddCategory = false
-    @State private var showingEmojiPicker = false
     @State private var newCategoryName = ""
     @FocusState private var focusedField: Field?
     
@@ -31,27 +30,24 @@ struct HabitFormView: View {
         NavigationStack {
             Form {
                 Section {
-                    // Emoji picker button
+                    // Emoji field with native emoji keyboard
                     HStack {
                         Text("Emoji")
                         Spacer()
-                        
-                        if emoji.isEmpty {
-                            Button {
-                                showingEmojiPicker = true
-                            } label: {
-                                Text("Tap to choose")
-                                    .foregroundStyle(.secondary)
+                        TextField("", text: $emoji)
+                            .font(.system(size: 40))
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 60)
+                            .onChange(of: emoji) { oldValue, newValue in
+                                // Keep only the first emoji character
+                                if let firstEmoji = newValue.first(where: { $0.isEmoji }) {
+                                    emoji = String(firstEmoji)
+                                }
                             }
-                        } else {
-                            Button {
-                                showingEmojiPicker = true
-                            } label: {
-                                Text(emoji)
-                                    .font(.system(size: 40))
-                            }
-                        }
                     }
+                    .listRowBackground(
+                        emoji.isEmpty ? Color.red.opacity(0.1) : Color.clear
+                    )
                     
                     // Name field
                     TextField("Habit Name", text: $name)
@@ -109,9 +105,6 @@ struct HabitFormView: View {
                 }
                 #endif
             }
-            .sheet(isPresented: $showingEmojiPicker) {
-                EmojiPickerSheet(selectedEmoji: $emoji, isPresented: $showingEmojiPicker)
-            }
             .alert("New Category", isPresented: $showingAddCategory) {
                 TextField("Category name", text: $newCategoryName)
                 Button("Cancel", role: .cancel) {
@@ -150,65 +143,6 @@ struct HabitFormView: View {
         modelContext.insert(newCategory)
         selectedCategory = newCategory
         newCategoryName = ""
-    }
-}
-
-// Native emoji keyboard sheet
-struct EmojiPickerSheet: View {
-    @Binding var selectedEmoji: String
-    @Binding var isPresented: Bool
-    @FocusState private var isFocused: Bool
-    
-    var body: some View {
-        NavigationStack {
-            VStack(spacing: 20) {
-                Text("Choose an emoji for your habit")
-                    .font(.headline)
-                    .padding(.top)
-                
-                TextField("", text: $selectedEmoji)
-                    .font(.system(size: 100))
-                    .multilineTextAlignment(.center)
-                    .focused($isFocused)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .onChange(of: selectedEmoji) { oldValue, newValue in
-                        // Extract only the first emoji
-                        if let firstEmoji = newValue.first(where: { $0.isEmoji }) {
-                            selectedEmoji = String(firstEmoji)
-                            isPresented = false
-                        }
-                    }
-                    #if os(iOS)
-                    .keyboardType(.default)
-                    .autocorrectionDisabled()
-                    #endif
-                
-                Text("Tap the keyboard icon to select an emoji")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                
-                Spacer()
-            }
-            .navigationTitle("Select Emoji")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        isPresented = false
-                    }
-                }
-            }
-            .onAppear {
-                // Small delay to ensure keyboard shows
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    isFocused = true
-                }
-            }
-        }
-        #if os(iOS)
-        .presentationDetents([.medium])
-        #endif
     }
 }
 
