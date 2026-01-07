@@ -15,15 +15,22 @@ struct HabitFormView: View {
     @Query private var categories: [HabitCategory]
     
     @State private var name = ""
-    @State private var emoji = ""
+    @State private var emoji = Self.randomEmoji()
     @State private var habitDescription = ""
     @State private var selectedCategory: HabitCategory?
     @State private var showingAddCategory = false
     @State private var newCategoryName = ""
     @FocusState private var focusedField: Field?
+    @FocusState private var isCategoryNameFocused: Bool
     
     enum Field {
         case emoji, name, description
+    }
+
+    private static let emojiOptions = ["🌟", "🎯", "💪", "🧠", "📚", "☀️", "🌈", "🪴", "🧘‍♀️"]
+
+    private static func randomEmoji() -> String {
+        emojiOptions.randomElement() ?? "⭐️"
     }
     
     var body: some View {
@@ -31,23 +38,16 @@ struct HabitFormView: View {
             Form {
                 Section {
                     // Emoji field with native emoji keyboard
-                    HStack {
-                        Text("Emoji")
-                        Spacer()
-                        TextField("", text: $emoji)
-                            .font(.system(size: 40))
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 60)
-                            .onChange(of: emoji) { oldValue, newValue in
-                                // Keep only the first emoji character
-                                if let firstEmoji = newValue.first(where: { $0.isEmoji }) {
-                                    emoji = String(firstEmoji)
-                                }
+                    TextField("Emoji", text: $emoji)
+                        .font(.system(size: 40))
+                        .multilineTextAlignment(.trailing)
+                        .frame(width: 60)
+                        .onChange(of: emoji) { oldValue, newValue in
+                            // Keep only the first emoji character
+                            if let firstEmoji = newValue.first(where: { $0.isEmoji }) {
+                                emoji = String(firstEmoji)
                             }
-                    }
-                    .listRowBackground(
-                        emoji.isEmpty ? Color.red.opacity(0.1) : Color.clear
-                    )
+                        }
                     
                     // Name field
                     TextField("Habit Name", text: $name)
@@ -60,7 +60,7 @@ struct HabitFormView: View {
                         .focused($focusedField, equals: .description)
                 }
                 
-                Section("Category") {
+                Section() {
                     Picker("Category", selection: $selectedCategory) {
                         Text("None").tag(nil as HabitCategory?)
                         ForEach(categories) { category in
@@ -77,6 +77,9 @@ struct HabitFormView: View {
                         Label("Add New Category", systemImage: "plus.circle")
                     }
                 }
+            }
+            .onAppear {
+                focusedField = .name
             }
             .navigationTitle("New Habit")
             .navigationBarTitleDisplayMode(.inline)
@@ -105,16 +108,35 @@ struct HabitFormView: View {
                 }
                 #endif
             }
-            .alert("New Category", isPresented: $showingAddCategory) {
-                TextField("Category name", text: $newCategoryName)
-                Button("Cancel", role: .cancel) {
-                    newCategoryName = ""
+            .sheet(isPresented: $showingAddCategory) {
+                NavigationStack {
+                    Form {
+                        TextField("Category name", text: $newCategoryName)
+                            .textInputAutocapitalization(.words)
+                            .focused($isCategoryNameFocused)
+                    }
+                    .navigationTitle("New Category")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Cancel") {
+                                newCategoryName = ""
+                                showingAddCategory = false
+                            }
+                        }
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Add") {
+                                addNewCategory()
+                                showingAddCategory = false
+                            }
+                            .disabled(newCategoryName.isEmpty)
+                        }
+                    }
+                    .onAppear {
+                        isCategoryNameFocused = true
+                    }
                 }
-                Button("Add") {
-                    addNewCategory()
-                }
-            } message: {
-                Text("Enter a name for the new category")
+                .presentationDetents([.height(220)])
             }
         }
     }

@@ -22,7 +22,7 @@ struct LogHabitView: View {
         NavigationStack {
             Form {
                 Section("When") {
-                    DatePicker("Date & Time", selection: $logDate)
+                    DatePicker("When", selection: $logDate)
                 }
                 
                 Section("Notes") {
