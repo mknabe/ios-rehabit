@@ -21,6 +21,7 @@ struct HabitEditView: View {
     @State private var habitDescription: String
     @State private var selectedCategory: HabitCategory?
     @State private var showingAddCategory = false
+    @State private var showingEmojiPicker = false
     @State private var newCategoryName = ""
     @FocusState private var focusedField: Field?
 
@@ -43,15 +44,19 @@ struct HabitEditView: View {
                     HStack {
                         Text("Emoji")
                         Spacer()
-                        TextField("", text: $emoji)
-                            .font(.system(size: 40))
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 60)
-                            .onChange(of: emoji) { oldValue, newValue in
-                                if let firstEmoji = newValue.first(where: { $0.isEmoji }) {
-                                    emoji = String(firstEmoji)
-                                }
-                            }
+                        Button {
+                            showingEmojiPicker = true
+                        } label: {
+                            Text(emoji.isEmpty ? "🙂" : emoji)
+                                .font(.system(size: 32))
+                                .frame(width: 50, height: 50)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color.black.opacity(0.08))
+                                )
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Choose emoji")
                     }
                     .listRowBackground(
                         emoji.isEmpty ? Color.red.opacity(0.1) : Color.clear
@@ -121,6 +126,11 @@ struct HabitEditView: View {
                 }
             } message: {
                 Text("Enter a name for the new category")
+            }
+            .sheet(isPresented: $showingEmojiPicker) {
+                EmojiPickerView(selectedEmoji: $emoji)
+                    .presentationDetents([.large])
+                    .presentationDragIndicator(.visible)
             }
         }
     }

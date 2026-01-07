@@ -19,6 +19,7 @@ struct HabitFormView: View {
     @State private var habitDescription = ""
     @State private var selectedCategory: HabitCategory?
     @State private var showingAddCategory = false
+    @State private var showingEmojiPicker = false
     @State private var newCategoryName = ""
     @FocusState private var focusedField: Field?
     @FocusState private var isCategoryNameFocused: Bool
@@ -37,17 +38,26 @@ struct HabitFormView: View {
         NavigationStack {
             Form {
                 Section {
-                    // Emoji field with native emoji keyboard
-                    TextField("Emoji", text: $emoji)
-                        .font(.system(size: 40))
-                        .multilineTextAlignment(.trailing)
-                        .frame(width: 60)
-                        .onChange(of: emoji) { oldValue, newValue in
-                            // Keep only the first emoji character
-                            if let firstEmoji = newValue.first(where: { $0.isEmoji }) {
-                                emoji = String(firstEmoji)
-                            }
+                    HStack {
+                        Text("Emoji")
+                        Spacer()
+                        Button {
+                            showingEmojiPicker = true
+                        } label: {
+                            Text(emoji.isEmpty ? "🙂" : emoji)
+                                .font(.system(size: 32))
+                                .frame(width: 50, height: 50)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color.black.opacity(0.08))
+                                )
                         }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Choose emoji")
+                    }
+                    .listRowBackground(
+                        emoji.isEmpty ? Color.red.opacity(0.1) : Color.clear
+                    )
                     
                     // Name field
                     TextField("Habit Name", text: $name)
@@ -137,6 +147,11 @@ struct HabitFormView: View {
                     }
                 }
                 .presentationDetents([.height(220)])
+            }
+            .sheet(isPresented: $showingEmojiPicker) {
+                EmojiPickerView(selectedEmoji: $emoji)
+                    .presentationDetents([.large])
+                    .presentationDragIndicator(.visible)
             }
         }
     }
