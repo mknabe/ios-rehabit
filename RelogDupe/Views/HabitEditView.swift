@@ -44,20 +44,23 @@ struct HabitEditView: View {
                     HStack {
                         Text("Emoji")
                         Spacer()
-                        Button {
-                            showingEmojiPicker = true
-                        } label: {
-                            Text(emoji.isEmpty ? "🙂" : emoji)
-                                .font(.system(size: 32))
-                                .frame(width: 50, height: 50)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color.black.opacity(0.08))
-                                )
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("Choose emoji")
+                        Text(emoji.isEmpty ? "🙂" : emoji)
+                            .font(.system(size: 32))
+                            .frame(width: 50, height: 50)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color.black.opacity(0.08))
+                            )
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(.secondary)
                     }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        showingEmojiPicker = true
+                    }
+                    .accessibilityLabel("Choose emoji")
+                    .accessibilityAddTraits(.isButton)
                     .listRowBackground(
                         emoji.isEmpty ? Color.red.opacity(0.1) : Color.clear
                     )

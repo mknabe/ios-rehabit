@@ -76,36 +76,50 @@ struct EmojiPickerView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     HStack(alignment: .center, spacing: 16) {
-                        TextField("Enter Any Emoji", text: $customEmoji)
-                            .font(.system(size: 18, weight: .semibold))
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 12)
-                            .background(
-                                RoundedRectangle(cornerRadius: 14)
-                                    .fill(Color.white.opacity(0.06))
-                            )
-                            .focused($isCustomFieldFocused)
-                            .onChange(of: customEmoji) { _, newValue in
-                                guard let firstEmoji = newValue.first(where: { $0.isEmoji }) else { return }
-                                let sanitized = String(firstEmoji)
-                                customEmoji = sanitized
-                                selectedEmoji = sanitized
-                            }
+                        Text("Enter Any Emoji")
+                            .font(.headline)
+
+                        Spacer()
 
                         ZStack {
                             RoundedRectangle(cornerRadius: 14)
-                                .fill(Color.white.opacity(0.06))
+                                .fill(Color.black.opacity(0.06))
                             Text(selectedEmoji.isEmpty ? "🙂" : selectedEmoji)
                                 .font(.system(size: 28))
                         }
                         .frame(width: 56, height: 56)
                         .shadow(color: Color.orange.opacity(0.45), radius: selectedEmoji.isEmpty ? 0 : 12, x: 0, y: 0)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            isCustomFieldFocused = true
+                        }
+
+                        TextField("", text: $customEmoji)
+                            .frame(width: 1, height: 1)
+                            .opacity(0.01)
+                            .focused($isCustomFieldFocused)
+                            .keyboardType(.default)
+                            .onChange(of: customEmoji) { oldValue, newValue in
+                                if newValue.isEmpty {
+                                    selectedEmoji = ""
+                                    customEmoji = ""
+                                    return
+                                }
+
+                                guard let firstEmoji = newValue.first(where: { $0.isEmoji }) else {
+                                    customEmoji = oldValue
+                                    return
+                                }
+
+                                let sanitized = String(firstEmoji)
+                                customEmoji = sanitized
+                                selectedEmoji = sanitized
+                            }
                     }
 
                     ForEach(emojiSections, id: \.title) { section in
                         Text(section.title)
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white.opacity(0.75))
+                            .font(.headline)
 
                         LazyVGrid(columns: columns, spacing: 14) {
                             ForEach(section.emojis, id: \.self) { emoji in

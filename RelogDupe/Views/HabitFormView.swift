@@ -38,30 +38,26 @@ struct HabitFormView: View {
         NavigationStack {
             Form {
                 Section {
+                    TextField("Habit Name", text: $name)
+                        .focused($focusedField, equals: .name)
+                    
                     HStack {
-                        Text("Emoji")
+                        Text("Icon")
                         Spacer()
-                        Button {
-                            showingEmojiPicker = true
-                        } label: {
-                            Text(emoji.isEmpty ? "🙂" : emoji)
-                                .font(.system(size: 32))
-                                .frame(width: 50, height: 50)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color.black.opacity(0.08))
-                                )
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("Choose emoji")
+                        Text(emoji)
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(.secondary)
                     }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        showingEmojiPicker = true
+                    }
+                    .accessibilityLabel("Choose emoji")
+                    .accessibilityAddTraits(.isButton)
                     .listRowBackground(
                         emoji.isEmpty ? Color.red.opacity(0.1) : Color.clear
                     )
-                    
-                    // Name field
-                    TextField("Habit Name", text: $name)
-                        .focused($focusedField, equals: .name)
                 }
                 
                 Section("Description") {
