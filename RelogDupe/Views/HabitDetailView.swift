@@ -74,7 +74,7 @@ struct HabitDetailView: View {
                 .presentationDetents([.medium])
         }
         .sheet(isPresented: $showingEditSheet) {
-            HabitEditView(habit: habit)
+            HabitFormView(habit: habit)
         }
         #if os(iOS)
         .overlay(alignment: .bottomTrailing) {

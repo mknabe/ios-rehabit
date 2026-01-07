@@ -9,14 +9,17 @@ import SwiftUI
 import SwiftData
 
 struct HabitFormView: View {
+    let habit: Habit?
+    private let isEditing: Bool
+
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     
     @Query private var categories: [HabitCategory]
     
-    @State private var name = ""
-    @State private var emoji = Self.randomEmoji()
-    @State private var habitDescription = ""
+    @State private var name: String
+    @State private var emoji: String
+    @State private var habitDescription: String
     @State private var selectedCategory: HabitCategory?
     @State private var showingAddCategory = false
     @State private var showingEmojiPicker = false
@@ -32,6 +35,15 @@ struct HabitFormView: View {
 
     private static func randomEmoji() -> String {
         emojiOptions.randomElement() ?? "⭐️"
+    }
+
+    init(habit: Habit? = nil) {
+        self.habit = habit
+        self.isEditing = habit != nil
+        _name = State(initialValue: habit?.name ?? "")
+        _emoji = State(initialValue: habit?.emoji ?? Self.randomEmoji())
+        _habitDescription = State(initialValue: habit?.habitDescription ?? "")
+        _selectedCategory = State(initialValue: habit?.category)
     }
     
     var body: some View {
@@ -50,14 +62,12 @@ struct HabitFormView: View {
                             .foregroundStyle(.secondary)
                     }
                     .contentShape(Rectangle())
+                    .background(Color.white)
                     .onTapGesture {
                         showingEmojiPicker = true
                     }
                     .accessibilityLabel("Choose emoji")
                     .accessibilityAddTraits(.isButton)
-                    .listRowBackground(
-                        emoji.isEmpty ? Color.red.opacity(0.1) : Color.clear
-                    )
                 }
                 
                 Section("Description") {
@@ -85,9 +95,11 @@ struct HabitFormView: View {
                 }
             }
             .onAppear {
-                focusedField = .name
+                if !isEditing {
+                    focusedField = .name
+                }
             }
-            .navigationTitle("New Habit")
+            .navigationTitle(isEditing ? "Edit Habit" : "New Habit")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -153,13 +165,20 @@ struct HabitFormView: View {
     }
     
     private func saveHabit() {
-        let habit = Habit(
-            name: name,
-            emoji: emoji,
-            description: habitDescription.isEmpty ? nil : habitDescription,
-            category: selectedCategory
-        )
-        modelContext.insert(habit)
+        if let habit {
+            habit.name = name
+            habit.emoji = emoji
+            habit.habitDescription = habitDescription.isEmpty ? nil : habitDescription
+            habit.category = selectedCategory
+        } else {
+            let habit = Habit(
+                name: name,
+                emoji: emoji,
+                description: habitDescription.isEmpty ? nil : habitDescription,
+                category: selectedCategory
+            )
+            modelContext.insert(habit)
+        }
         
         #if os(iOS) && !targetEnvironment(simulator)
         let generator = UINotificationFeedbackGenerator()
