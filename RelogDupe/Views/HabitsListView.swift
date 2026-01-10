@@ -15,7 +15,6 @@ struct HabitsListView: View {
     @State private var showingAddHabit = false
     @State private var searchText = ""
     @State private var habitToLog: Habit?
-    @State private var showingUpcoming = false
     
     var filteredHabits: [Habit] {
         if searchText.isEmpty {
@@ -62,9 +61,6 @@ struct HabitsListView: View {
             .navigationDestination(for: Habit.self) { habit in
                 HabitDetailView(habit: habit)
             }
-            .navigationDestination(isPresented: $showingUpcoming) {
-                UpcomingView()
-            }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button {
@@ -81,17 +77,6 @@ struct HabitsListView: View {
                 LogHabitView(habit: habit)
                     .presentationDetents([.medium])
             }
-            #if os(iOS)
-            .safeAreaInset(edge: .bottom) {
-                BottomMenuBar(
-                    selected: .habits,
-                    onUpcoming: { showingUpcoming = true },
-                    onHabits: {},
-                    onLog: {}
-                )
-                .padding(.bottom, 8)
-            }
-            #endif
         }
     }
     

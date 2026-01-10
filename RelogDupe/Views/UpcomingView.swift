@@ -10,7 +10,6 @@ import SwiftData
 
 struct UpcomingView: View {
     @Query(sort: \Habit.createdAt, order: .reverse) private var habits: [Habit]
-    @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     
     @State private var habitToLog: Habit?
@@ -55,7 +54,7 @@ struct UpcomingView: View {
                     }
                 }
             }
-            .navigationTitle("Habits")
+            .navigationTitle("Upcoming Tasks")
             #if os(iOS)
             .navigationBarTitleDisplayMode(.large)
             #endif
@@ -66,17 +65,6 @@ struct UpcomingView: View {
                 LogHabitView(habit: habit)
                     .presentationDetents([.medium])
             }
-            #if os(iOS)
-            .safeAreaInset(edge: .bottom) {
-                BottomMenuBar(
-                    selected: .upcoming,
-                    onUpcoming: {},
-                    onHabits: { dismiss() },
-                    onLog: {}
-                )
-                .padding(.bottom, 8)
-            }
-            #endif
         }
     }
     
