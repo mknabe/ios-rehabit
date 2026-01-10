@@ -11,10 +11,12 @@ import SwiftData
 struct HabitRow: View {
     let habit: Habit
     let onEmojiTap: (() -> Void)?
+    let secondaryText: String?
 
-    init(habit: Habit, onEmojiTap: (() -> Void)? = nil) {
+    init(habit: Habit, onEmojiTap: (() -> Void)? = nil, secondaryText: String? = nil) {
         self.habit = habit
         self.onEmojiTap = onEmojiTap
+        self.secondaryText = secondaryText
     }
     
     var body: some View {
@@ -45,7 +47,11 @@ struct HabitRow: View {
                     .fontDesign(.rounded)
                 
                 // Last logged time
-                if let lastLog = habit.lastLogDate {
+                if let secondaryText {
+                    Text(secondaryText)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                } else if let lastLog = habit.lastLogDate {
                     Text(lastLog, style: .relative)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
@@ -71,8 +77,24 @@ struct HabitRow: View {
         .accessibilityElement(children: .contain)
         .accessibilityLabel("\(habit.emoji) \(habit.name)")
         .accessibilityHint("Tap to view logs")
-        .accessibilityValue(habit.lastLogDate != nil ? "Last logged \(habit.lastLogDate!, style: .relative)" : "Not logged yet")
+        .accessibilityValue(accessibilitySecondaryValue)
     }
+    
+    private var accessibilitySecondaryValue: String {
+        if let secondaryText {
+            return secondaryText
+        }
+        if let lastLog = habit.lastLogDate {
+            return "Last logged \(Self.relativeFormatter.localizedString(for: lastLog, relativeTo: Date()))"
+        }
+        return "Not logged yet"
+    }
+    
+    private static let relativeFormatter: RelativeDateTimeFormatter = {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .full
+        return formatter
+    }()
 }
 
 #Preview {
