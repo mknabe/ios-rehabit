@@ -47,12 +47,6 @@ struct HabitDetailView: View {
                     Label("Edit Habit", systemImage: "pencil")
                 }
             }
-
-            ToolbarItem(placement: .navigationBarTrailing) {
-                if !sortedLogs.isEmpty {
-                    EditButton()
-                }
-            }
             #else
             ToolbarItem {
                 Button("Edit") {
@@ -79,19 +73,17 @@ struct HabitDetailView: View {
         #if os(iOS)
         .overlay(alignment: .bottomTrailing) {
             // Floating action button for iOS
-            if !sortedLogs.isEmpty {
-                Button {
-                    showingLogSheet = true
-                } label: {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.system(size: 56))
-                        .foregroundStyle(.blue)
-                        .background(.white)
-                        .clipShape(Circle())
-                        .shadow(radius: 4)
-                }
-                .padding()
+            Button {
+                showingLogSheet = true
+            } label: {
+                Image(systemName: "plus.circle.fill")
+                    .font(.system(size: 56))
+//                        .foregroundStyle(.blue)
+//                        .background(.white)
+                    .clipShape(Circle())
+                    .shadow(radius: 4)
             }
+            .padding()
         }
         #endif
     }
