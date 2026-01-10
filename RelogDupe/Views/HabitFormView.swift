@@ -21,6 +21,9 @@ struct HabitFormView: View {
     @State private var emoji: String
     @State private var habitDescription: String
     @State private var selectedCategory: HabitCategory?
+    @State private var showInUpcoming: Bool
+    @State private var upcomingInterval: UpcomingReminderInterval
+    @State private var upcomingDuration: Int
     @State private var showingAddCategory = false
     @State private var showingEmojiPicker = false
     @State private var newCategoryName = ""
@@ -32,6 +35,12 @@ struct HabitFormView: View {
     }
 
     private static let emojiOptions = ["🌟", "🎯", "💪", "🧠", "📚", "☀️", "🌈", "🪴", "🧘‍♀️"]
+    private static let durationFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .none
+        formatter.allowsFloats = false
+        return formatter
+    }()
 
     private static func randomEmoji() -> String {
         emojiOptions.randomElement() ?? "⭐️"
@@ -44,6 +53,9 @@ struct HabitFormView: View {
         _emoji = State(initialValue: habit?.emoji ?? Self.randomEmoji())
         _habitDescription = State(initialValue: habit?.habitDescription ?? "")
         _selectedCategory = State(initialValue: habit?.category)
+        _showInUpcoming = State(initialValue: habit?.upcomingReminder != nil)
+        _upcomingInterval = State(initialValue: habit?.upcomingReminder?.interval ?? .month)
+        _upcomingDuration = State(initialValue: habit?.upcomingReminder?.duration ?? 1)
     }
     
     var body: some View {
@@ -74,6 +86,39 @@ struct HabitFormView: View {
                     TextEditor(text: $habitDescription)
                         .frame(minHeight: 100)
                         .focused($focusedField, equals: .description)
+                }
+                
+                Section {
+                    Toggle("Show in Upcoming Tab", isOn: $showInUpcoming)
+                    
+                    if showInUpcoming {
+                        HStack {
+                            Text("After")
+                            Spacer()
+                            TextField("", value: $upcomingDuration, formatter: Self.durationFormatter)
+                                .frame(width: 48)
+                                .multilineTextAlignment(.trailing)
+                                .onChange(of: upcomingDuration) { _, newValue in
+                                    if newValue < 1 {
+                                        upcomingDuration = 1
+                                    }
+                                }
+                                #if os(iOS)
+                                .keyboardType(.numberPad)
+                                #endif
+                            Picker("", selection: $upcomingInterval) {
+                                ForEach(UpcomingReminderInterval.allCases) { interval in
+                                    Text(intervalLabel(for: interval)).tag(interval)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .labelsHidden()
+                        }
+                        
+                        Text("This habit will appear in the Upcoming Tab if it hasn't been completed after \(upcomingSummary).")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 
                 Section() {
@@ -165,17 +210,34 @@ struct HabitFormView: View {
     }
     
     private func saveHabit() {
+        let normalizedDuration = max(1, upcomingDuration)
         if let habit {
             habit.name = name
             habit.emoji = emoji
             habit.habitDescription = habitDescription.isEmpty ? nil : habitDescription
             habit.category = selectedCategory
+            if showInUpcoming {
+                if let reminder = habit.upcomingReminder {
+                    reminder.interval = upcomingInterval
+                    reminder.duration = normalizedDuration
+                } else {
+                    habit.upcomingReminder = UpcomingReminder(
+                        interval: upcomingInterval,
+                        duration: normalizedDuration
+                    )
+                }
+            } else {
+                habit.upcomingReminder = nil
+            }
         } else {
             let habit = Habit(
                 name: name,
                 emoji: emoji,
                 description: habitDescription.isEmpty ? nil : habitDescription,
-                category: selectedCategory
+                category: selectedCategory,
+                upcomingReminder: showInUpcoming
+                    ? UpcomingReminder(interval: upcomingInterval, duration: normalizedDuration)
+                    : nil
             )
             modelContext.insert(habit)
         }
@@ -195,6 +257,17 @@ struct HabitFormView: View {
         modelContext.insert(newCategory)
         selectedCategory = newCategory
         newCategoryName = ""
+    }
+    
+    private var upcomingSummary: String {
+        let intervalName = upcomingInterval.displayName
+        let label = upcomingDuration == 1 ? intervalName : "\(intervalName)s"
+        return "\(upcomingDuration) \(label)"
+    }
+    
+    private func intervalLabel(for interval: UpcomingReminderInterval) -> String {
+        let base = interval.displayName
+        return upcomingDuration == 1 ? base : "\(base)s"
     }
 }
 
