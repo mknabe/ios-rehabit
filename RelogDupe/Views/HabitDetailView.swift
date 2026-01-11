@@ -7,6 +7,10 @@
 
 import SwiftUI
 import SwiftData
+import RelogShared
+#if canImport(WidgetKit)
+import WidgetKit
+#endif
 
 struct HabitDetailView: View {
     let habit: Habit
@@ -92,6 +96,11 @@ struct HabitDetailView: View {
         for index in offsets {
             modelContext.delete(sortedLogs[index])
         }
+        try? modelContext.save()
+
+        #if canImport(WidgetKit)
+        WidgetCenter.shared.reloadTimelines(ofKind: WidgetKinds.upcoming)
+        #endif
         
         #if os(iOS) && !targetEnvironment(simulator)
         let generator = UINotificationFeedbackGenerator()

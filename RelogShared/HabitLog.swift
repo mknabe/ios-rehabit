@@ -9,14 +9,14 @@ import SwiftData
 import Foundation
 
 @Model
-class HabitLog {
-    @Attribute(.unique) var id: UUID
-    var loggedAt: Date
-    var additionalInfo: String?
+public class HabitLog {
+    @Attribute(.unique) public var id: UUID
+    public var loggedAt: Date
+    public var additionalInfo: String?
     
-    var habit: Habit?
+    public var habit: Habit?
     
-    init(loggedAt: Date = Date(), additionalInfo: String? = nil) {
+    public init(loggedAt: Date = Date(), additionalInfo: String? = nil) {
         self.id = UUID()
         self.loggedAt = loggedAt
         self.additionalInfo = additionalInfo

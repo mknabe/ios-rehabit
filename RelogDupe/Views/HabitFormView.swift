@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import RelogShared
 
 struct HabitFormView: View {
     let habit: Habit?

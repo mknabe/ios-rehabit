@@ -8,48 +8,48 @@
 import SwiftData
 import Foundation
 
-enum UpcomingReminderInterval: String, Codable, CaseIterable, Identifiable {
+public enum UpcomingReminderInterval: String, Codable, CaseIterable, Identifiable {
     case hour
     case day
     case week
     case month
     case year
     
-    var id: String { rawValue }
+    public var id: String { rawValue }
     
-    var displayName: String {
+    public var displayName: String {
         rawValue.capitalized
     }
 }
 
 @Model
-class UpcomingReminder {
-    var interval: UpcomingReminderInterval
-    var duration: Int
+public class UpcomingReminder {
+    public var interval: UpcomingReminderInterval
+    public var duration: Int
     
-    init(interval: UpcomingReminderInterval, duration: Int) {
+    public init(interval: UpcomingReminderInterval, duration: Int) {
         self.interval = interval
         self.duration = duration
     }
 }
 
 @Model
-class Habit {
-    @Attribute(.unique) var id: UUID
-    var name: String
-    var emoji: String
-    var habitDescription: String?
-    var createdAt: Date
+public class Habit {
+    @Attribute(.unique) public var id: UUID
+    public var name: String
+    public var emoji: String
+    public var habitDescription: String?
+    public var createdAt: Date
     
-    var category: HabitCategory?
+    public var category: HabitCategory?
 
     @Relationship(deleteRule: .cascade)
-    var upcomingReminder: UpcomingReminder?
+    public var upcomingReminder: UpcomingReminder?
     
     @Relationship(deleteRule: .cascade, inverse: \HabitLog.habit)
-    var logs: [HabitLog]?
+    public var logs: [HabitLog]?
     
-    init(
+    public init(
         name: String,
         emoji: String,
         description: String? = nil,
@@ -66,20 +66,20 @@ class Habit {
     }
     
     // Computed property for last log date
-    var lastLogDate: Date? {
+    public var lastLogDate: Date? {
         logs?.sorted(by: { $0.loggedAt > $1.loggedAt }).first?.loggedAt
     }
     
     // Computed property for total log count
-    var totalLogs: Int {
+    public var totalLogs: Int {
         logs?.count ?? 0
     }
     
-    var showInUpcoming: Bool {
+    public var showInUpcoming: Bool {
         upcomingReminder != nil
     }
     
-    var upcomingDueDate: Date? {
+    public var upcomingDueDate: Date? {
         guard let reminder = upcomingReminder else { return nil }
         guard let baseDate = lastLogDate else { return nil }
         let calendar = Calendar.current
@@ -97,7 +97,7 @@ class Habit {
         }
     }
     
-    var isUpcomingDue: Bool {
+    public var isUpcomingDue: Bool {
         guard let dueDate = upcomingDueDate else { return false }
         return Date() >= dueDate
     }

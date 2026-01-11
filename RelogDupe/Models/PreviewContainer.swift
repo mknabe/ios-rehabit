@@ -6,6 +6,7 @@
 //
 
 import SwiftData
+import RelogShared
 import Foundation
 
 @MainActor
@@ -15,16 +16,8 @@ class PreviewContainer {
     let container: ModelContainer
     
     init() {
-        let schema = Schema([
-            Habit.self,
-            HabitLog.self,
-            HabitCategory.self
-        ])
-        
-        let configuration = ModelConfiguration(isStoredInMemoryOnly: true)
-        
         do {
-            container = try ModelContainer(for: schema, configurations: configuration)
+            container = try SharedModelContainer.makeContainer(inMemory: true)
             
             // Add sample data
             let context = container.mainContext

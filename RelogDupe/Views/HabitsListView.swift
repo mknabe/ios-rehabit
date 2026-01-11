@@ -7,6 +7,10 @@
 
 import SwiftUI
 import SwiftData
+import RelogShared
+#if canImport(WidgetKit)
+import WidgetKit
+#endif
 
 struct HabitsListView: View {
     @Query(sort: \Habit.createdAt, order: .reverse) private var habits: [Habit]
@@ -84,6 +88,10 @@ struct HabitsListView: View {
         let log = HabitLog(loggedAt: Date())
         log.habit = habit
         modelContext.insert(log)
+        
+        #if canImport(WidgetKit)
+        WidgetCenter.shared.reloadTimelines(ofKind: WidgetKinds.upcoming)
+        #endif
 
         #if os(iOS) && !targetEnvironment(simulator)
         let generator = UINotificationFeedbackGenerator()

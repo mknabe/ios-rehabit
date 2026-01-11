@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import RelogShared
 
 struct RootTabsView: View {
     enum Item {

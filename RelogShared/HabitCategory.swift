@@ -9,15 +9,15 @@ import SwiftData
 import Foundation
 
 @Model
-class HabitCategory {
-    @Attribute(.unique) var id: UUID
-    var name: String?
-    var createdAt: Date
+public class HabitCategory {
+    @Attribute(.unique) public var id: UUID
+    public var name: String?
+    public var createdAt: Date
     
     @Relationship(deleteRule: .nullify, inverse: \Habit.category)
-    var habits: [Habit]?
+    public var habits: [Habit]?
     
-    init(name: String? = nil) {
+    public init(name: String? = nil) {
         self.id = UUID()
         self.name = name
         self.createdAt = Date()
