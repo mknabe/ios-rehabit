@@ -16,21 +16,40 @@ struct RootTabsView: View {
     }
     
     
+    @Query(sort: \Habit.createdAt, order: .reverse) private var habits: [Habit]
     @State private var selected: Item = .habits
+    
+    private var upcomingCount: Int {
+        habits.filter { $0.isUpcomingDue }.count
+    }
     
     var body: some View {
         TabView(selection: $selected) {
-            HabitsListView()
-                .tag(Item.habits)
-                .tabItem {
-                    Label("Habits", systemImage: "checkmark.circle")
-                }
-            
             UpcomingView()
                 .tag(Item.upcoming)
                 .tabItem {
                     Label("Upcoming", systemImage: "calendar.badge.clock")
                 }
+                .modifier(UpcomingBadge(count: upcomingCount))
+            
+            HabitsListView()
+                .tag(Item.habits)
+                .tabItem {
+                    Label("Habits", systemImage: "checkmark.circle")
+                }
+        }
+    }
+    
+}
+
+private struct UpcomingBadge: ViewModifier {
+    let count: Int
+    
+    func body(content: Content) -> some View {
+        if count > 0 {
+            content.badge(count)
+        } else {
+            content
         }
     }
 }

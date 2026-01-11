@@ -16,8 +16,8 @@ struct UpcomingView: View {
     
     private var upcomingHabits: [Habit] {
         habits
-            .filter { isDue($0) }
-            .sorted { (dueDate(for: $0) ?? .distantPast) < (dueDate(for: $1) ?? .distantPast) }
+            .filter { $0.isUpcomingDue }
+            .sorted { ($0.upcomingDueDate ?? .distantPast) < ($1.upcomingDueDate ?? .distantPast) }
     }
     
     var body: some View {
@@ -65,29 +65,6 @@ struct UpcomingView: View {
                 LogHabitView(habit: habit)
                     .presentationDetents([.medium])
             }
-        }
-    }
-    
-    private func isDue(_ habit: Habit) -> Bool {
-        guard let due = dueDate(for: habit) else { return false }
-        return Date() >= due
-    }
-    
-    private func dueDate(for habit: Habit) -> Date? {
-        guard let reminder = habit.upcomingReminder else { return nil }
-        let baseDate = habit.lastLogDate ?? habit.createdAt
-        let calendar = Calendar.current
-        switch reminder.interval {
-        case .hour:
-            return calendar.date(byAdding: .hour, value: reminder.duration, to: baseDate)
-        case .day:
-            return calendar.date(byAdding: .day, value: reminder.duration, to: baseDate)
-        case .week:
-            return calendar.date(byAdding: .weekOfYear, value: reminder.duration, to: baseDate)
-        case .month:
-            return calendar.date(byAdding: .month, value: reminder.duration, to: baseDate)
-        case .year:
-            return calendar.date(byAdding: .year, value: reminder.duration, to: baseDate)
         }
     }
     

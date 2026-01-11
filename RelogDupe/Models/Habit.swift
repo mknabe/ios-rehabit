@@ -78,4 +78,27 @@ class Habit {
     var showInUpcoming: Bool {
         upcomingReminder != nil
     }
+    
+    var upcomingDueDate: Date? {
+        guard let reminder = upcomingReminder else { return nil }
+        guard let baseDate = lastLogDate else { return nil }
+        let calendar = Calendar.current
+        switch reminder.interval {
+        case .hour:
+            return calendar.date(byAdding: .hour, value: reminder.duration, to: baseDate)
+        case .day:
+            return calendar.date(byAdding: .day, value: reminder.duration, to: baseDate)
+        case .week:
+            return calendar.date(byAdding: .weekOfYear, value: reminder.duration, to: baseDate)
+        case .month:
+            return calendar.date(byAdding: .month, value: reminder.duration, to: baseDate)
+        case .year:
+            return calendar.date(byAdding: .year, value: reminder.duration, to: baseDate)
+        }
+    }
+    
+    var isUpcomingDue: Bool {
+        guard let dueDate = upcomingDueDate else { return false }
+        return Date() >= dueDate
+    }
 }
