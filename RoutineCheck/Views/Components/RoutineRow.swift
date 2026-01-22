@@ -43,8 +43,6 @@ struct RoutineRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(routine.name)
                     .font(.title2)
-                    .fontWeight(.bold)
-                    .fontDesign(.rounded)
                 
                 // Last logged time
                 if let secondaryText {

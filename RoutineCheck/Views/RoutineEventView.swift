@@ -14,13 +14,21 @@ import WidgetKit
 
 struct RoutineEventView: View {
     let routine: Routine
+    let event: RoutineEvent?
     
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     
-    @State private var logDate = Date()
-    @State private var additionalInfo = ""
+    @State private var logDate: Date
+    @State private var additionalInfo: String
     @FocusState private var isNotesFieldFocused: Bool
+    
+    init(routine: Routine, event: RoutineEvent? = nil) {
+        self.routine = routine
+        self.event = event
+        _logDate = State(initialValue: event?.loggedAt ?? Date())
+        _additionalInfo = State(initialValue: event?.additionalInfo ?? "")
+    }
     
     var body: some View {
         NavigationStack {
@@ -39,15 +47,21 @@ struct RoutineEventView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                    Button {
                         dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
                     }
+                    .accessibilityLabel("Cancel")
                 }
                 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Log Event") {
-                        logEvent()
+                    Button {
+                        saveEvent()
+                    } label: {
+                        Image(systemName: "checkmark")
                     }
+                    .accessibilityLabel("Save")
                 }
                 
                 #if os(iOS)
@@ -64,13 +78,20 @@ struct RoutineEventView: View {
         }
     }
     
-    private func logEvent() {
-        let log = RoutineEvent(
-            loggedAt: logDate,
-            additionalInfo: additionalInfo.isEmpty ? nil : additionalInfo
-        )
-        log.routine = routine
-        modelContext.insert(log)
+    private func saveEvent() {
+        if let event {
+            event.loggedAt = logDate
+            event.additionalInfo = additionalInfo.isEmpty ? nil : additionalInfo
+        } else {
+            let log = RoutineEvent(
+                loggedAt: logDate,
+                additionalInfo: additionalInfo.isEmpty ? nil : additionalInfo
+            )
+            log.routine = routine
+            modelContext.insert(log)
+        }
+        
+        try? modelContext.save()
         
         #if canImport(WidgetKit)
         WidgetCenter.shared.reloadTimelines(ofKind: WidgetKinds.pastDue)

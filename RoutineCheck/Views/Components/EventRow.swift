@@ -13,17 +13,25 @@ struct EventRow: View {
     let event: RoutineEvent
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(event.loggedAt, format: .dateTime.day().month().year().hour().minute())
-                .font(.headline)
-            
-            if let info = event.additionalInfo, !info.isEmpty {
-                Text(info)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+        HStack(alignment: .top) {
+            VStack(alignment: .leading) {
+                Text(event.loggedAt, format: .dateTime.day().month().year().hour().minute())
+                    .font(.headline)
+                
+                if let info = event.additionalInfo, !info.isEmpty {
+                    Text(info)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
             }
+            
+            Spacer(minLength: 8)
+            
+            Image(systemName: "chevron.right")
+                .font(.subheadline)
+                .foregroundStyle(.tertiary)
+                .padding(.top, 2)
         }
-        .padding(.vertical, 4)
     }
 }
 
